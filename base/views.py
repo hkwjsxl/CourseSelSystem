@@ -11,7 +11,6 @@ from django.http import JsonResponse
 from django.contrib import auth
 
 
-# Create your views here.
 def index(request):
 
     return render(request, 'base/index.html', locals())
