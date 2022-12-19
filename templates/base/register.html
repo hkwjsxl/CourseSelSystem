@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>register</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'bootstrap-3.4.1-dist/css/bootstrap.min.css' %}">
+    <script src="{% static 'js/jquery-1.11.3.min.js' %}"></script>
+    <script src="{% static 'bootstrap-3.4.1-dist/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/csrf_token.js' %}"></script>
+
+    <style>
+        #avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-left: 20px;
+        }
+    </style>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <h3 class="text-center">注册</h3>
+            <form id="reg_form" method="post" enctype="multipart/form-data" novalidate>
+                {% for form in form_obj %}
+                    <div class="form-group">
+                        <label for="{{ form.auto_id }}">{{ form.label }}: </label>{{ form }}
+                        <span style="color: red">{{ form.errors.0 }}</span>
+                    </div>
+                {% endfor %}
+                <div class="form-group">
+                    <label for="avatar_input">头像: <img id="avatar" src="/static/images/default.png" alt="默认头像"></label>
+                    <input type="file" id="avatar_input" class="form-control hide">
+                </div>
+                <div class="form-group">
+                    <input type="button" id="reg_btn" class="btn btn-primary btn-block" value="注册">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 头像
+    $('#avatar_input').change(function () {
+        let myFileReaderObj = new FileReader();
+        let fileObj = $(this)[0].files[0];
+        myFileReaderObj.readAsDataURL(fileObj)
+        myFileReaderObj.onload = function () {
+            $('#avatar').attr('src', myFileReaderObj.result)
+        }
+    })
+    // 注册
+    $('#reg_btn').click(function () {
+        let formDataObj = new FormData;
+        $.each($('#reg_form').serializeArray(), function (index, obj) {
+            formDataObj.append(obj.name, obj.value)
+        })
+        formDataObj.append('avatar', $('#avatar_input')[0].files[0]);
+        formDataObj.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        $.ajax({
+            url: '',
+            type: 'post',
+            data: formDataObj,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                if (res.status === 2000) {
+                    window.location.href = '{% url "base:signin" %}';
+                } else {
+                    $.each(res.data, function (content, error_array) {
+                        label_name = '#id_' + content;
+                        $(label_name).parent().addClass('has-error');
+                        $(label_name).next().text(error_array[0]);
+                    })
+                }
+            },
+        })
+    })
+    // 移除错误高亮
+    $('input').focus(function () {
+        $(this).next().text('').parent().removeClass('has-error');
+    })
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>signin</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'bootstrap-3.4.1-dist/css/bootstrap.min.css' %}">
+    <script src="{% static 'js/jquery-1.11.3.min.js' %}"></script>
+    <script src="{% static 'js/csrf_token.js' %}"></script>
+    <script src="{% static 'bootstrap-3.4.1-dist/js/bootstrap.min.js' %}"></script>
+    <style>
+        #auth_code_img {
+            width: 350px;
+            height: 35px;
+        }
+    </style>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <h3 class="text-center">登录</h3>
+            <form id="signin_form" novalidate>
+                <div class="form-group">
+                    <label for="id_username">用户名: </label>
+                    <input type="text" id="id_username" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_password">密码: </label>
+                    <input type="password" id="id_password" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="auth_code">验证码:</label>
+                    <span id="error_msg" style="color: red"></span>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" id="auth_code" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <img src="{% url 'base:get_auth_code' %}" alt="验证码" id="auth_code_img">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="signin_btn" value="登录" class="btn btn-success btn-block">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 刷新验证码
+    $('#auth_code_img').click(function () {
+        ref_code();
+    })
+
+    function ref_code() {
+        let that = $('#auth_code_img');
+        let old_src = that.attr('src');
+        that.attr('src', old_src + '?');
+    }
+
+    // 登录
+    $('#signin_btn').click(function () {
+        ref_code();
+
+        $.ajax({
+            url: '',
+            type: 'post',
+            data: {
+                'username': $('#id_username').val(),
+                'password': $('#id_password').val(),
+                'auth_code': $('#auth_code').val(),
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function (res) {
+                if (res.status === 2000) {
+                    window.location.href = '{% url "base:index" %}';
+                } else {
+                    let error_msg = res.message;
+                    $('#error_msg').text(error_msg);
+                }
+            },
+        })
+    })
+</script>
+
+
+</body>
+</html>
