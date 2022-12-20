@@ -1,0 +1,46 @@
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>course-edit</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="panel-title">修改</div>
+        </div>
+        <div class="panel-body">
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_name">课程名称: </label>
+                    <input type="text" id="id_name" name="name" value="{{ course_obj.name }}" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_credit">课程学分: </label>
+                    <input type="text" id="id_credit" name="credit" value="{{ course_obj.credit }}"
+                           class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_date">开课时间: </label>
+                    <input type="date" id="id_date" name="date" value="{{ course_obj.course_open_time }}"
+                           class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_teacher">课程老师: </label>
+                    <select name="teacher" id="id_teacher" class="form-control">
+                        {% for teacher_obj in teacher_queryset %}
+                            {% if course_obj.teacher.pk == teacher_obj.pk %}
+                                <option value="{{ teacher_obj.pk }}" selected>{{ teacher_obj.name }}</option>
+                            {% else %}
+                                <option value="{{ teacher_obj.pk }}">{{ teacher_obj.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <input type="submit" class="btn btn-danger" value="确认修改">
+                <a href="{% url 'base:course' %}" class="btn btn-primary">取消修改</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

@@ -1,0 +1,29 @@
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>teacher-edit</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="panel-title">修改</div>
+        </div>
+        <div class="panel-body">
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_name">老师名称: </label>
+                    <input type="text" id="id_name" name="name" value="{{ teacher_obj.name }}" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_phone">老师手机号: </label>
+                    <input type="text" id="id_phone" name="phone" value="{{ teacher_obj.phone }}" class="form-control">
+                </div>
+
+                <input type="submit" class="btn btn-danger" value="确认修改">
+                <a href="{% url 'base:classes' %}" class="btn btn-primary">取消修改</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

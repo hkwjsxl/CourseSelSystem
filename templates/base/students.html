@@ -1,0 +1,173 @@
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>students</title>
+{% endblock title %}
+{% block css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+    <script src="{% static 'js/sweetalert2.min.js' %}"></script>
+    <style>
+        #id_import_group {
+            margin-left: 33px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="panel-title">学生管理</div>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <form action="{% url 'student:search' %}" method="post" class="navbar-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="id_search"></label>
+                            <input type="text" id="id_search" name="key_word" value="{{ key_word }}"
+                                   class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_select"></label>
+                            <select name="category" id="id_select" class="form-control">
+                                <option value="name">姓名</option>
+                                <option value="classes">班级</option>
+                                <option value="course">课程</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-default">查询</button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <a href="{% url 'student:add' %}" class="add_btn btn btn-success pull-right">添加</a>
+                </div>
+
+            </div>
+            <div class="row">
+                <form action="{% url 'student:import_student' %}" method="post" enctype="multipart/form-data"
+                      novalidate>
+                    {% csrf_token %}
+                    <div class="form-group" id="id_import_group">
+                        <input type="file" class="pull-left" name="import_file">
+                        <input type="submit" value="从excel批量导入" class="btn btn-success pull-left">
+                    </div>
+                </form>
+            </div>
+            <div class="row">
+                <table class="table table-hover table-striped text-center">
+                    <thead>
+                    <tr>
+                        <th class="text-center">序号</th>
+                        <th class="text-center">姓名</th>
+                        <th class="text-center">年龄</th>
+                        <th class="text-center">班级</th>
+                        <th class="text-center">所选课程</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for student_obj in stu_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ student_obj.name }}</td>
+                            <td>{{ student_obj.age }}</td>
+                            {#<td>{{ student_obj.student_detail.get_gender_display }}</td>#}
+                            <td>{{ student_obj.classes.name }}</td>
+                            <td>
+                                {% for course_obj in student_obj.course.all %}
+                                    {% if forloop.last %}
+                                        {{ course_obj.name }}
+                                    {% else %}
+                                        {{ course_obj.name }},
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <a href="{% url 'student:edit' student_obj.pk %}" class="btn btn-primary btn-sm">修改</a>
+                                <button current_pk="{{ student_obj.pk }}" class="del_btn btn btn-danger btn-sm">删除
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <!--分页-->
+                <nav aria-label="Page navigation" class="text-center">
+                    <ul class="pagination">
+                        {% if current_page >= 3 %}
+                            <li>
+                                <a href="/students/?page=1">
+                                    <span aria-hidden="true">1</span>
+                                </a>
+                            </li>
+                            <li>
+                                <span class="ellipsis">...</span>
+                            </li>
+                        {% else %}
+
+                        {% endif %}
+
+                        {% for num in page_ranges %}
+                            {% if num == current_page %}
+                                <li class="item active"><a href="/students/?page={{ num }}">{{ num }}</a></li>
+                            {% else %}
+                                <li><a href="/students/?page={{ num }}">{{ num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if current_page < total_pages %}
+                            <li>
+                                <span class="ellipsis">...</span>
+                            </li>
+                            <li>
+                                <a href="/students/?page={{ paginator.num_pages }}">
+                                    <span aria-hidden="true">{{ paginator.num_pages }}</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block js %}
+    <script>
+        $('.del_btn').click(function () {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let $that = $(this);
+                    $.ajax({
+                        url: '{% url "student:dels" %}',
+                        type: 'post',
+                        data: {
+                            'current_pk': $(this).attr('current_pk'),
+                        },
+                        success: function (res) {
+                            if (res.status === 2000) {
+                                $that.parent().parent().remove();
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Your file has been deleted.',
+                                    'success'
+                                )
+                            } else {
+                                window.location.reload();
+                            }
+                        }
+                    })
+                }
+            })
+        })
+    </script>
+{% endblock js %}

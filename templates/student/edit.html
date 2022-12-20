@@ -1,0 +1,54 @@
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>student-edit</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="panel-title">修改</div>
+        </div>
+        <div class="panel-body">
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_name">姓名: </label>
+                    <input type="text" id="id_name" name="name" value="{{ stu_obj.name }}" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_age">年龄: </label>
+                    <input type="text" id="id_age" name="age" value="{{ stu_obj.age }}" class="form-control">
+                </div>
+                <div class="form-group">
+                    {% for class_obj in class_queryset %}
+                        {% if stu_obj.classes_id == class_obj.pk %}
+                            <label for="id_classes_{{ forloop.counter }}">{{ class_obj.name }}</label>
+                            <input type="radio" id="id_classes_{{ forloop.counter }}" name="classes"
+                                   value="{{ class_obj.pk }}" checked>
+                        {% else %}
+                            <label for="id_classes_{{ forloop.counter }}">{{ class_obj.name }}</label>
+                            <input type="radio" id="id_classes_{{ forloop.counter }}" name="classes"
+                                   value="{{ class_obj.pk }}">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    {% for course_obj in course_queryset %}
+                        {% if forloop.counter in course_id_list %}
+                            <label for="id_course_{{ forloop.counter }}">{{ course_obj.name }}</label>
+                            <input type="checkbox" id="id_course_{{ forloop.counter }}" name="course"
+                                   value="{{ course_obj.pk }}" checked>
+                        {% else %}
+                            <label for="id_course_{{ forloop.counter }}">{{ course_obj.name }}</label>
+                            <input type="checkbox" id="id_course_{{ forloop.counter }}" name="course"
+                                   value="{{ course_obj.pk }}">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <input type="submit" class="btn btn-danger" value="确认修改">
+                <a href="{% url 'base:students' %}" class="btn btn-primary">取消修改</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

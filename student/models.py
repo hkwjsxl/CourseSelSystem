@@ -55,7 +55,7 @@ class Course(models.Model):
     credit = models.SmallIntegerField(default=3, verbose_name='课程学分')
     course_open_time = models.DateField(auto_now=True, verbose_name='开课时间')
 
-    teacher = models.ForeignKey(to='Teacher', on_delete=models.CASCADE, related_name='teacher')
+    teacher = models.ForeignKey(to='Teacher', on_delete=models.CASCADE, related_name='teacher', null=True, blank=True)
 
     class Meta:
         db_table = "db_course"

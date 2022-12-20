@@ -1,0 +1,77 @@
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>students</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="panel-title">查询结果</div>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <a href="{% url 'base:students' %}" class="btn btn-success btn-sm">返回</a>
+                <table class="table table-hover table-striped text-center">
+                    <thead>
+                    <tr>
+                        <th class="text-center">序号</th>
+                        <th class="text-center">姓名</th>
+                        <th class="text-center">年龄</th>
+                        <th class="text-center">班级</th>
+                        <th class="text-center">所选课程</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for student_obj in ret_queryset %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ student_obj.name }}</td>
+                            <td>{{ student_obj.age }}</td>
+                            <td>{{ student_obj.classes.name }}</td>
+                            <td>
+                                {% for course_obj in student_obj.course.all %}
+                                    {% if forloop.last %}
+                                        {{ course_obj.name }}
+                                    {% else %}
+                                        {{ course_obj.name }},
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <a href="{% url 'student:edit' student_obj.pk %}" class="btn btn-primary btn-sm">修改</a>
+                                <button current_pk="{{ student_obj.pk }}" class="del_btn btn btn-danger btn-sm">删除
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block js %}
+    <script>
+        $('.del_btn').click(function () {
+            let $that = $(this);
+            $.ajax({
+                url: '{% url "student:dels" %}',
+                type: 'post',
+                data: {
+                    'current_pk': $(this).attr('current_pk'),
+                },
+                success: function (res) {
+                    if (res.status === 2000) {
+                        $that.parent().parent().remove();
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            })
+        })
+    </script>
+{% endblock js %}

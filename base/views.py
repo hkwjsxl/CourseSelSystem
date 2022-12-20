@@ -9,10 +9,11 @@ from student import models
 from utils.res import ResponseData
 from django.http import JsonResponse
 from django.contrib import auth
+from django.db import transaction
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def index(request):
-
     return render(request, 'base/index.html', locals())
 
 
@@ -41,7 +42,7 @@ def signin(request):
 
 def signout(request):
     auth.logout(request)
-    return redirect('base:signin')
+    return redirect('base:index')
 
 
 def register(request):
@@ -56,10 +57,14 @@ def register(request):
                 avatar = request.FILES.get('avatar')
                 if avatar:
                     clean_data['avatar'] = avatar
-                print(clean_data)
                 username = clean_data.get('username')
-                stu_obj = models.Student.objects.create(name=username)
-                models.UserInfo.objects.create_user(**clean_data, student=stu_obj)
+                try:
+                    with transaction.atomic():
+                        stu_obj = models.Student.objects.create(name=username)
+                        models.UserInfo.objects.create_user(**clean_data, student=stu_obj)
+                except Exception as e:
+                    print(e)
+                    print('服务器错误---register!')
             else:
                 error_data = form_obj.errors
                 res_dict.status = 4000
@@ -114,7 +119,7 @@ def get_auth_code(request, size=(450, 35), mode="RGB", bg_color=(255, 255, 255))
 
         for i in range(len(char_list)):
             code_str = char_list[i]
-            font = ImageFont.truetype('static/font/Rondal-Semibold.ttf', size=24)
+            font = ImageFont.truetype('media/static/font/Rondal-Semibold.ttf', size=24)
             draw.text(((i + 1) * 75, 0), code_str, "red", font=font)
 
         return code_string
@@ -129,3 +134,67 @@ def get_auth_code(request, size=(450, 35), mode="RGB", bg_color=(255, 255, 255))
     io_obj = BytesIO()
     img.save(io_obj, 'PNG')
     return HttpResponse(io_obj.getvalue())
+
+
+def edit_avatar(request):
+    if request.method == 'POST':
+        new_avatar = request.FILES.get('new_avatar')
+        if new_avatar:
+            request.user.avatar = new_avatar
+            request.user.save()
+        return redirect('base:index')
+
+
+def edit_password(request):
+    if request.method == 'POST':
+        old_password = request.POST.get('old_password')
+        new_password = request.POST.get('new_password')
+        is_right = request.user.check_password(old_password)
+        if is_right:
+            request.user.set_password(new_password)
+            request.user.save()
+            return redirect('base:signin')
+        return HttpResponse('原密码错误!')
+
+
+def students(request):
+    student_queryset = models.Student.objects.all()
+    paginator = Paginator(student_queryset, 2)
+    total_pages = paginator.num_pages - 1
+    current_page = request.GET.get('page', 1)
+    current_page = int(current_page)
+    if current_page < 1 or current_page > paginator.num_pages:
+        current_page = 1
+    previous_page = current_page - 1
+    next_page = current_page + 1
+    if previous_page == 0:
+        page_ranges = range(1, 4)
+    elif current_page == paginator.num_pages:
+        page_ranges = range(paginator.num_pages - 2, paginator.num_pages + 1)
+    else:
+        page_ranges = [previous_page, current_page, next_page]
+    stu_list = paginator.page(current_page)
+    tem_dict = {
+        'student_queryset': student_queryset,
+        'paginator': paginator,
+        'current_page': current_page,
+        'total_pages': total_pages,
+        'page_ranges': page_ranges,
+        'stu_list': stu_list,
+    }
+    return render(request, 'base/students.html', locals())
+
+
+def classes(request):
+    class_queryset = models.Classes.objects.all()
+    return render(request, 'base/classes.html', locals())
+
+
+def course(request):
+    course_queryset = models.Course.objects.all()
+    return render(request, 'base/course.html', locals())
+
+
+def teacher(request):
+    teacher_queryset = models.Teacher.objects.all()
+    return render(request, 'base/teacher.html', locals())

@@ -1,0 +1,41 @@
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>course-add</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="panel-title">添加</div>
+        </div>
+        <div class="panel-body">
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_name">课程名称: </label>
+                    <input type="text" id="id_name" name="name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_credit">课程学分: </label>
+                    <input type="text" id="id_credit" name="credit" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_date">开课时间: </label>
+                    <input type="date" id="id_date" name="date" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_teacher">课程老师: </label>
+                    <select name="teacher" id="id_teacher" class="form-control">
+                        <option value="" selected disabled></option>
+                        {% for teacher_obj in teacher_queryset %}
+                            <option value="{{ teacher_obj.pk }}">{{ teacher_obj.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <input type="submit" class="btn btn-danger" value="确认添加">
+                <a href="{% url 'base:course' %}" class="btn btn-primary">取消添加</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

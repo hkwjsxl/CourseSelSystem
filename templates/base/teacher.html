@@ -1,0 +1,60 @@
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>teacher</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="panel-title">老师管理</div>
+        </div>
+        <div class="panel-body">
+            <table class="table table-hover table-striped text-center">
+                <thead>
+                <tr>
+                    <th class="text-center">序号</th>
+                    <th class="text-center">姓名</th>
+                    <th class="text-center">手机号</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for teacher_obj in teacher_queryset %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ teacher_obj.name }}</td>
+                        <td>{{ teacher_obj.phone }}</td>
+                        <td>
+                            <a href="{% url 'teacher:edit' teacher_obj.pk %}" class="btn btn-primary btn-sm">修改</a>
+                            <button current_pk="{{ teacher_obj.pk }}" class="del_btn btn btn-danger btn-sm">删除</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <a href="{% url 'teacher:add' %}" class="add_btn btn btn-success pull-right">添加</a>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block js %}
+    <script>
+        $('.del_btn').click(function () {
+            let $that = $(this);
+            $.ajax({
+                url: '{% url "teacher:dels" %}',
+                type: 'post',
+                data: {
+                    'current_pk': $(this).attr('current_pk'),
+                },
+                success: function (res) {
+                    if (res.status === 2000) {
+                        $that.parent().parent().remove();
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            })
+        })
+    </script>
+{% endblock js %}

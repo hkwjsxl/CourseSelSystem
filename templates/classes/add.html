@@ -1,0 +1,25 @@
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>classes-add</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="panel-title">添加</div>
+        </div>
+        <div class="panel-body">
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_name">班级名称: </label>
+                    <input type="text" id="id_name" name="name" class="form-control">
+                </div>
+
+                <input type="submit" class="btn btn-danger" value="确认添加">
+                <a href="{% url 'base:classes' %}" class="btn btn-primary">取消添加</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

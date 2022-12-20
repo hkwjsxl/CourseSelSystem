@@ -1,0 +1,40 @@
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>student-add</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="panel-title">添加</div>
+        </div>
+        <div class="panel-body">
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_name">姓名: </label>
+                    <input type="text" id="id_name" name="name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_age">年龄: </label>
+                    <input type="text" id="id_age" name="age" class="form-control">
+                </div>
+                <div class="form-group">
+                    {% for class_obj in class_queryset %}
+                        <label for="id_classes_{{ forloop.counter }}">{{ class_obj.name }}</label>
+                        <input type="radio" id="id_classes_{{ forloop.counter }}" name="classes" value="{{ class_obj.pk }}">
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    {% for course_obj in course_queryset %}
+                        <label for="id_course_{{ forloop.counter }}">{{ course_obj.name }}</label>
+                        <input type="checkbox" id="id_course_{{ forloop.counter }}" name="course" value="{{ course_obj.pk }}">
+                    {% endfor %}
+                </div>
+                <input type="submit" class="btn btn-danger" value="确认添加">
+                <a href="{% url 'base:students' %}" class="btn btn-primary">取消添加</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}
